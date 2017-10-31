@@ -27,6 +27,9 @@
     <ClInclude Include="..\..\RansomwareExample\RansomwareExample\AESCrypto.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\RansomwareExample\RansomwareExample\RSACrypto.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -39,6 +42,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\RansomwareExample\RansomwareExample\AESCrypto.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\RansomwareExample\RansomwareExample\RSACrypto.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
