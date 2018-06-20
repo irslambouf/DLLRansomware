@@ -24,10 +24,10 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\RansomwareExample\RansomwareExample\AESCrypto.h">
+    <ClInclude Include="..\..\ransomware\RansomwareExample\AESCrypto.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\RansomwareExample\RansomwareExample\RSACrypto.h">
+    <ClInclude Include="..\..\ransomware\RansomwareExample\RSACrypto.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -41,10 +41,10 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\RansomwareExample\RansomwareExample\AESCrypto.cpp">
+    <ClCompile Include="..\..\ransomware\RansomwareExample\AESCrypto.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\RansomwareExample\RansomwareExample\RSACrypto.cpp">
+    <ClCompile Include="..\..\ransomware\RansomwareExample\RSACrypto.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

